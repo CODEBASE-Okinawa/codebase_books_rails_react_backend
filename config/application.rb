@@ -18,15 +18,6 @@ module Workspace
     config.active_job.queue_adapter = :delayed_job
     config.autoload_paths << "#{Rails.root}/lib"
 
-    config.middleware.insert_before 0, Rack::Cors do
-      allow do
-        origins ENV["FRONTEND_ORIGIN"]
-        resource "*",
-                 headers: :any,
-                 methods: [:get, :post, :patch, :delete, :options, :head]
-      end
-    end
-
     # Configuration for the application, engines, and railties goes here.
     #
     # These settings can be overridden in specific environments using the files
