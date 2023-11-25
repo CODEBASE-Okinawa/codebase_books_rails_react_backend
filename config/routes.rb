@@ -6,7 +6,7 @@ Rails.application.routes.draw do
   }
   namespace :api, fomat: :json do
     scope :v1 do
-      mount_devise_token_auth_for 'User', at: 'auth', controllers: {
+      mount_devise_token_auth_for 'User', at: 'auth',skip: [:omniauth_callbacks], controllers: {
         registrations: "devise_token_auth/registrations",
         sessions: "devise_token_auth/sessions"
       }
