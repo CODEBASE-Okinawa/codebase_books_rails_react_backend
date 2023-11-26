@@ -3,5 +3,6 @@ class Admin::UsersController < ApplicationController
 
     def index
         @users = User.where.not(role: 0)
+        render json: @users
     end
 end

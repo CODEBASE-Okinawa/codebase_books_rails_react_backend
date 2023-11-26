@@ -1,6 +1,7 @@
 class Admin::RequestsController < ApplicationController
   def index
     @requests = RequestBook.where(status: "true")
+    render json: @requests
   end
 
   def toggle
@@ -9,6 +10,7 @@ class Admin::RequestsController < ApplicationController
     request.status = !request.status
     request.save
 
-    redirect_to admin_requests_path
+    # redirect_to admin_requests_path
+    render json: request
   end
 end
