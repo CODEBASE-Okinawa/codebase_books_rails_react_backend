@@ -1,6 +1,6 @@
 class BooksController < ApplicationController
   before_action :redirect_to_admin_books, only: [:index]
-  # before_action :authenticate_user!, only: [:show]
+  before_action :authenticate_user!, only: [:show]
   
   def index
     books = Book.eager_load(:reservation_active, :lend_active).with_attached_image.order(:id)

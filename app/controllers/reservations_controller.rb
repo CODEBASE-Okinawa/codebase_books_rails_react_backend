@@ -1,5 +1,5 @@
 class ReservationsController < ApplicationController
-  # before_action :authenticate_user!, only: %i[index show destroy]
+  before_action :authenticate_user!, only: %i[index show destroy]
   before_action :delete_old_reservations, only: %i[show]
 
   def index
