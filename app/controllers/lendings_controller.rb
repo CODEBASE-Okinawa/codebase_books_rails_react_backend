@@ -1,24 +1,26 @@
 class LendingsController < ApplicationController
-  before_action :redirect_to_sign_in, only: [:index, :show], unless: :user_signed_in?
+  before_action :authenticate_user!, only: [:index, :show]
   before_action :redirect_lendings, only: :show
 
   def index
-    @lendings = current_user&.lendings.not_yet_returned
+    lendings = current_user&.lendings.not_yet_returned
+    render json: lendings
   end
 
   def show
     @lending = Lending.find(params[:id])
+    render json: @lending
   end
 
   def update
     lending = Lending.find(params[:id])
 
     if lending.update(return_status: true)
-      flash[:success] = "返却が完了しました"
-      redirect_to book_path(lending.book)
+      # redirect_to book_path(lending.book)
+      render json: { status: 'SUCCESS', message: '返却が完了しました', data: lending }
     else
-      flash.now[:failed] = "返却に失敗しました"
-      render "show", status: :unprocessable_entity
+      # render "show", status: :unprocessable_entity
+      render json: { status: :unprocessable_entity, message: '返却に失敗しました', data: lending.errors }
     end
   end
 
@@ -26,8 +28,8 @@ class LendingsController < ApplicationController
     @lending = Book.find(params[:book_id]).lendings.build(lending_params(params))
     return unless @lending.save
 
-    flash[:success] = "貸出が完了しました"
-    redirect_to lendings_path
+    # redirect_to lendings_path
+    render json: { status: :created, message: '貸出が完了しました', date: @lending }
   end
 
   private
@@ -42,6 +44,7 @@ class LendingsController < ApplicationController
   def redirect_lendings
     if current_user&.lendings.find_by(id: params[:id]).blank?
       redirect_to lendings_path
+      render json: { status: :unprocessable_entity, message: "この本は借りていません", daga: @lendings.errors }
     end
   end
 end

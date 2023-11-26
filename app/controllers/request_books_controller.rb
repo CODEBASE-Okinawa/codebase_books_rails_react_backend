@@ -5,8 +5,8 @@ class RequestBooksController < ApplicationController
         @result = GoogleBooksApi.search_by_word(word)
         
         if @result["totalItems"] == 0
-            flash[:danger] = "本が見つかりませんでした"
-            redirect_to searches_path
+            # redirect_to searches_path
+            render json: { status: 'SUCCESS', message: '本が見つかりませんでした', data: @result }
         else
             @books = []
             @result["items"].each do |item|
@@ -18,7 +18,14 @@ class RequestBooksController < ApplicationController
             @requests = RequestBook.all
             @have_books = Book.eager_load(:lending)
             @request_now = RequestBook.where(status: "true")
-            render template: "searches/index"
+            #template: "searches/index"
+            render json: { status: 'SUCCESS', message: '本が見つかりました', 
+                data: {
+                    @books,
+                    @requests,
+                    @hove_books,
+                    @result
+                    } }
         end
     end
 
@@ -27,13 +34,16 @@ class RequestBooksController < ApplicationController
         
         if @items.save
             flash[:success] = "#{@items["title"]}をリクエストしました"
-            redirect_to searches_path
+            # redirect_to searches_path
+            render json: { status: 'SUCCESS', message: '本をリクエストしました。', data: @items }
         else
-            render template: "searches/index"
+            # render template: "searches/index"
+            render json: { status: :unprocessable_entity, message: 'リクエストに失敗しました。', data: @items.errors }
         end
     end
 
     def update
+        render json: @request
     end
 
     private

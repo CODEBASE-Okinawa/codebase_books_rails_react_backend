@@ -1,10 +1,11 @@
 class ReservationsController < ApplicationController
-  before_action :redirect_to_sign_in, only: %i[index show], unless: :user_signed_in?
+  # before_action :authenticate_user!, only: %i[index show destroy]
   before_action :delete_old_reservations, only: %i[show]
 
   def index
     @reservations = Reservation.where(user_id: current_user&.id).where("reservation_at >= ?",
                                                                        Time.now).order(reservation_at: :asc)
+    render json: @reservations
   end
 
   def show
@@ -19,18 +20,19 @@ class ReservationsController < ApplicationController
       # reservation_remind_dateメソッドで返された日付にメールを送るように、ジョブにキューイング。
       MailDeliveryJob.set(wait_until: reservation_remind_date(@reservation.reservation_at)).perform_later(@reservation)
 
-      flash[:success] = "予約が完了しました"
-      redirect_to reservations_path
+      # redirect_to reservations_path
+      render json: { status: 'SUCCESS', message: '予約が完了しました', data: @reservation }
     end
   end
 
   def destroy
     reservation = Reservation.find(params[:id])
     if reservation.destroy
-      flash[:success] = "予約のキャンセルが完了しました"
-      redirect_to reservations_path
+      # redirect_to reservations_path
+      render json: { status: 'SUCCESS', message: '予約のキャンセルが完了しました', data: reservation }
     else
-      redirect_to request.referer
+      # redirect_to request.referer
+      render json: { status: :unprocessable_entity, message: '予約のキャンセルに失敗しました', data: reservation.errors }
     end
   end
 
@@ -44,7 +46,8 @@ class ReservationsController < ApplicationController
   def delete_old_reservations
     old_reservations = Reservation.where("reservation_at < ?", Date.today)
     if old_reservations.destroy_all && old_reservations.exists?
-      redirect_to reservations_path
+      # redirect_to reservations_path
+      render json: { status: 'SUCCESS', message: '古い予約を削除しました'}
     end
   end
 

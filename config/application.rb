@@ -17,6 +17,8 @@ module Workspace
 
     config.active_job.queue_adapter = :delayed_job
     config.autoload_paths << "#{Rails.root}/lib"
+    config.middleware.use ActionDispatch::Flash
+
 
     # Configuration for the application, engines, and railties goes here.
     #
